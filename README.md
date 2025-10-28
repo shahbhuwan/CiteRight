@@ -1,166 +1,162 @@
-Project: NASA STREAM Satellite Data Downloader
+# Project A7 - Automation: NASA STREAM Satellite Data Downloader
 
-Author: Bhuwan Shah
+**Author:** Bhavin Shah\
+**Email:** bshah@iastate.edu
 
-Email: bshah@iastate.edu
+------------------------------------------------------------------------
 
-**======================================================================**
+## 🛰️ Overview
 
-**WHAT THE SHELL SCRIPT DOES**
+This project demonstrates a **Model Launcher** and **Data Downloader**
+workflow designed to automatically retrieve NASA STREAM satellite data.
 
-**======================================================================**
+The shell scripts (`run_stream_download.bat` and
+`run_stream_download.sh`) are lightweight launchers that execute the
+main automation script `run_project.py` using the system's default
+Python.
 
-This project demonstrates a "Model Launcher" and "Data Downloader" workflow.
+------------------------------------------------------------------------
 
-The shell scripts (run\_stream\_download.bat and run\_stream\_download.sh) are simple, portable launchers. Their only job is to execute the main automation script, run\_project.py, using the system's default Python.
+## ⚙️ Workflow Summary
 
-The core automation is handled by run\_project.py. When executed, it performs the following steps:
+### Main Steps in `run_project.py`
 
-&nbsp;  1. Sets Up Environment: It checks for a local folder named stream\_env. If it doesn't exist, it creates a new Python virtual environment in that folder.
+1.  **Environment Setup**
+    -   Checks for a local folder named `stream_env`.\
+    -   If not found, creates a new Python virtual environment.
+2.  **Dependency Installation**
+    -   Uses the virtual environment's `pip` to install all required
+        libraries:
+        -   `requests`, `geopandas`, `mgrs`, etc.\
+    -   Ensures the environment is verified and isolated on every run.
+3.  **Input Parsing**
+    -   Reads download parameters from `Input/params.txt`.
+4.  **Downloader Execution**
+    -   Invokes `stream_downloader.py` using parameters from
+        `params.txt`.
+5.  **Data Download**
+    -   Contacts the NASA STREAM API.\
+    -   Finds and downloads satellite data that match the parameters.\
+    -   Saves resulting `.TIF` files in the `Output` directory.
 
-&nbsp;  2. Installs Dependencies: It uses the virtual environment's pip to install all required Python libraries (requests, geopandas, mgrs, etc.) from the internet. This ensures the host machine is not affected. This step runs every time to verify the environment is correct.
+This entire setup is **portable** across **Windows** and **UNIX-based**
+systems with Python 3.x.
 
-&nbsp;  3. Parses Input: It reads the download parameters from the Input/params.txt file.
+------------------------------------------------------------------------
 
-&nbsp;  4. Executes Downloader: It calls the main application, stream\_downloader.py, using the virtual environment's Python and the parameters from params.txt.
+## 💻 How to Run
 
-&nbsp;  5. Downloads Data: The stream\_downloader.py script contacts the NASA STREAM API, finds available satellite data matching the parameters, and downloads the resulting .TIF files into the Output folder.
+### Prerequisites
 
-This entire workflow is portable and can be run on any Windows or UNIX-based machine that has a base installation of Python 3.
+-   Python **3.x** (installed on the system).\
+-   Internet connection (required on first run for dependency
+    installation).
 
+### On Windows
 
+1.  Unzip the project folder.\
+2.  Double-click **`run_stream_download.bat`**.\
+3.  A command window opens.
+    -   First run: 1--2 minutes (environment setup).\
+    -   Subsequent runs: much faster.
 
-**======================================================================** 
+### On UNIX / macOS / Linux
 
-**2. HOW TO RUN**
+1.  Unzip the project folder.\
 
-**======================================================================**
+2.  Open a terminal and navigate into the folder.\
 
-**Prerequisites:**
+3.  Make the script executable:
 
-&nbsp;  A base installation of Python 3.x (for running run\_project.py).
+    ``` bash
+    chmod +x run_stream_download.sh
+    ```
 
-&nbsp;  An internet connection (for the first run, to install dependencies).
+4.  Run the script:
 
-**Windows:**
+    ``` bash
+    ./run_stream_download.sh
+    ```
 
-Unzip the folder.
+------------------------------------------------------------------------
 
-Double-click run\_stream\_download.bat.
+## 🧭 Input Configuration
 
-A command window will open. The first run will take 1-2 minutes to install the environment. Subsequent runs will be much faster.
+The **only** file that needs modification for custom downloads is:\
+`Input/params.txt`
 
-**UNIX (Linux/macOS):**
+Lines starting with `#` are comments.\
+The default configuration downloads **Chlorophyll-a** data for **Lake
+Pontchartrain**.
 
-Unzip the folder.
+### Available Arguments
 
-Open a terminal and navigate into the folder.
+#### **Location (Choose at least one)**
 
-Make the script executable: chmod +x run\_stream\_download.sh
+-   `--site "Location Name"` --- Geocodes a human-readable name (e.g.,
+    `"Ames Iowa"`, `"Lake Tahoe"`).\
+-   `--latlon "lat,lon"` --- Uses an exact coordinate (e.g.,
+    `"30.205,-90.096"`).\
+-   `--bbox "minlat,minlon,maxlat,maxlon"` --- Finds tiles intersecting
+    a bounding box.\
+-   `--tile "TileID"` --- Downloads a specific tile (e.g., `"T15TVG"`,
+    `"021039"`).
 
-Run the script: ./run\_stream\_download.sh
+#### **Data (Choose at least one of each)**
 
+-   `--product {chla|tss|secchi|tar}`
+    -   `chla` --- Chlorophyll-a (water quality)\
+    -   `tss` --- Total Suspended Solids (water quality)\
+    -   `secchi` --- Secchi Disk Depth (water clarity)\
+    -   `tar` --- TAR-zipped raw files (product dependent)\
+-   `--satellite {Sentinel|Landsat|Sentinel2A|Sentinel2B|Sentinel2C|Landsat8|Landsat9}`
+    -   `Sentinel` group includes 2A, 2B, and 2C.\
+    -   `Landsat` group includes 8 and 9.
 
+#### **Date (Choose one method)**
 
-**======================================================================** 
+-   `--date YYYY-MM-DD` --- Specific date (can repeat for multiple).\
+-   `--start YYYY-MM-DD --end YYYY-MM-DD` --- Date range.
 
-**3. INPUT**
+#### **Download Options**
 
-**======================================================================**
+-   `--prefer-tif` --- *(Recommended)* Download full-resolution GeoTIF
+    instead of low-res PNG.\
+-   `--max-workers N` --- Optional parallel downloads (default: 6).\
+-   `--wrs2-shp "path/to/shapefile.shp"` --- Optional Landsat WRS-2
+    shapefile path.
+    -   Default: `.\WRS2_descending_0\WRS2_descending.shp`
 
-The only file you need to edit to change the download query is:
+------------------------------------------------------------------------
 
-Input/params.txt
+## 📊 Expected Output
 
-This file contains all the command-line arguments for the downloader. Lines starting with # are comments. The default file is set to find Chlorophyll-a data for Lake Pontchartrain.
+### Console Output
 
-Available Arguments for params.txt:
+Verbose logging includes:\
+- **Environment Setup:** pip installation messages.\
+- **Preparing Download:** shows the full command being executed.\
+- **Downloader Execution:** live progress including:\
+- Geocoding results (e.g., `Geocoded 'Lake Pontchartrain' -> ...`)\
+- Tile discovery (`Sentinel tiles: T16RCN`, `Landsat tiles: 021039`)\
+- Summary of available files\
+- File download or skip notifications (`✅ Downloaded -> ...`,
+`↷ Skip ...`)\
+- Final summary: `All Done ✅`
 
+### File Output
 
+All data saved under the `Output/` folder in this structure:
 
-**Location (Choose at least one)**
+    Output/
+    └── site_Lake_Pontchartrain/
+        └── 021039_Landsat_chla/
+            └── LC09_L1TP_021039_..._Chla_AQV202405.TIF
 
---site "Location Name": Geocodes a human-readable name (e.g., "Ames Iowa", "Lake Tahoe").
+------------------------------------------------------------------------
 
---latlon "lat,lon": Uses an exact coordinate (e.g., "30.205,-90.096").
+## 🧩 Summary
 
---bbox "minlat,minlon,maxlat,maxlon":Finds all tiles that intersect a bounding box.
-
---tile "TileID": Downloads data for a specific tile (e.g., "T15TVG" or "021039").
-
-
-
-**Data (Choose at least one of each)**
-
---product {chla|tss|secchi}: The data product to download.
-
-&nbsp; chla: Chlorophyll-a (water quality)
-
-&nbsp; tss: Total Suspended Solids (water quality)
-
-&nbsp; secchi: Secchi Disk Depth (water clarity)
-
---satellite {Sentinel|Landsat|Sentinel2A|Sentinel2B|Sentinel2C|Landsat8|Landsat9}: The satellite(s) to query.
-
-&nbsp; Sentinel (group) includes 2A, 2B, and 2C.
-
-&nbsp; Landsat (group) includes 8 and 9.
-
-
-
-**Date (Choose one method)**
-
---date YYYY-MM-DD: Downloads data for one specific date. Can be repeated for multiple dates.
-
---start YYYY-MM-DD and --end YYYY-MM-DD: Downloads all available data within a date range.
-
-
-
-**Download Options**
-
---prefer-tif: (Recommended) Downloads the full-resolution GeoTIF file. If omitted, downloads a low-resolution PNG quick-look.
-
---max-workers N: (Optional) Sets the number of parallel downloads. Default is 6.
-
---wrs2-shp "path/to/shapefile.shp": (Optional) Path to the Landsat WRS-2 shapefile. Default: .\\WRS2\_descending\_0\\WRS2\_descending.shp
-
-
-
-**======================================================================** 
-
-**4. EXPECTED OUTPUT**
-
-**======================================================================**
-
-**Console Output:** The script is very verbose and will print its progress in stages:
-
-&nbsp; Environment Setup: You will see pip install messages as it builds the stream\_env.
-
-&nbsp; Preparing Download Request: It will show the final command it is about to run.
-
-&nbsp; Running Downloader: It will show the live log from the downloader, including:
-
-&nbsp;   Geocoding results (e.g., "Geocoded 'Lake Pontchartrain' -> ...")
-
-&nbsp;   Tile discovery (e.g., "Sentinel tiles: T16RCN", "Landsat tiles: 021039")
-
-&nbsp;   A summary of files found (e.g., "Found 2 file(s)... Starting download...")
-
-&nbsp;   A line for every file downloaded ("✅ Downloaded -> ...") or skipped ("↷ Skip ...").
-
-&nbsp; All Done ✅: A final summary message.
-
-
-
-**File Output:**
-
-&nbsp; All downloaded satellite images will be placed in the Output/ folder.
-
-&nbsp; A subfolder is created for each location (e.g., Output/site\_Lake\_Pontchartrain/).
-
-&nbsp; A sub-subfolder is created for each tile/satellite/product (e.g., .../021039\_Landsat\_chla/).
-
-&nbsp; The final .TIF files are placed inside (e.g., .../LC09\_L1TP\_021039\_...\_Chla\_AQV202405.TIF).
-
-
-
+This project provides a **self-contained**, **cross-platform**, and
+**automated** workflow for downloading and managing NASA STREAM
+satellite imagery with minimal setup.
